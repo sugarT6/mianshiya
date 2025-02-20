@@ -1,23 +1,28 @@
 package com.Tl.mianshiya.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.Tl.mianshiya.common.ErrorCode;
 import com.Tl.mianshiya.constant.CommonConstant;
 import com.Tl.mianshiya.exception.ThrowUtils;
 import com.Tl.mianshiya.mapper.QuestionBankQuestionMapper;
 import com.Tl.mianshiya.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
+import com.Tl.mianshiya.model.entity.Question;
+import com.Tl.mianshiya.model.entity.QuestionBank;
 import com.Tl.mianshiya.model.entity.QuestionBankQuestion;
 import com.Tl.mianshiya.model.entity.User;
 import com.Tl.mianshiya.model.vo.QuestionBankQuestionVO;
 import com.Tl.mianshiya.model.vo.UserVO;
 import com.Tl.mianshiya.service.QuestionBankQuestionService;
+import com.Tl.mianshiya.service.QuestionBankService;
+import com.Tl.mianshiya.service.QuestionService;
 import com.Tl.mianshiya.service.UserService;
 import com.Tl.mianshiya.utils.SqlUtils;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -40,6 +45,15 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     @Resource
     private UserService userService;
 
+    @Resource
+    @Lazy
+    private QuestionService questionService;
+
+
+    @Resource
+    @Lazy
+    private QuestionBankService questionBankService;
+
     /**
      * 校验数据
      *
@@ -49,19 +63,19 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     @Override
     public void validQuestionBankQuestion(QuestionBankQuestion questionBankQuestion, boolean add) {
         ThrowUtils.throwIf(questionBankQuestion == null, ErrorCode.PARAMS_ERROR);
-//        // todo 从对象中取值
-//        String title = questionBankQuestion.getTitle();
-//        // 创建数据时，参数不能为空
-//        if (add) {
-//            // todo 补充校验规则
-//            ThrowUtils.throwIf(StringUtils.isBlank(title), ErrorCode.PARAMS_ERROR);
-//        }
-//        // 修改数据时，有参数则校验
-//        // todo 补充校验规则
-//        if (StringUtils.isNotBlank(title)) {
-//            ThrowUtils.throwIf(title.length() > 80, ErrorCode.PARAMS_ERROR, "标题过长");
-//        }
+        // 题目和题库必须存在
+        Long questionId = questionBankQuestion.getQuestionId();
+        if (questionId != null) {
+            Question question = questionService.getById(questionId);
+            ThrowUtils.throwIf(question == null, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        }
+        Long questionBankId = questionBankQuestion.getQuestionBankId();
+        if (questionBankId != null) {
+            QuestionBank questionBank = questionBankService.getById(questionBankId);
+            ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
+        }
     }
+
 
     /**
      * 获取查询条件
@@ -83,6 +97,7 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         Long questionId = questionBankQuestionQueryRequest.getQuestionId();
         Long questionBankId = questionBankQuestionQueryRequest.getQuestionBankId();
         Long userId = questionBankQuestionQueryRequest.getUserId();
+
         // todo 补充需要的查询条件
 
         // 精确查询

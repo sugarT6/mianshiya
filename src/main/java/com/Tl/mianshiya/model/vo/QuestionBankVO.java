@@ -1,7 +1,9 @@
 package com.Tl.mianshiya.model.vo;
 
 import cn.hutool.json.JSONUtil;
+import com.Tl.mianshiya.model.entity.Question;
 import com.Tl.mianshiya.model.entity.QuestionBank;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -88,4 +90,11 @@ public class QuestionBankVO implements Serializable {
         BeanUtils.copyProperties(questionBank, questionBankVO);
         return questionBankVO;
     }
+
+
+        /**
+         * 题库里的题目列表（分页）
+         */
+        Page<Question> questionPage;
+
 }
